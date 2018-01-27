@@ -76,6 +76,3 @@ def get_contents(data):
     cleantext = re.sub(cleanr, '', data)
     return cleantext
 
-
-dat = get_contents("<font wut is this>this is some data </font>")
-print(dat)
