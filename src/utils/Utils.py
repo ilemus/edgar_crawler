@@ -70,9 +70,9 @@ def get_font(data):
 
     return ret_val
 
+
 # Removes tags and leaves data inside
 def get_contents(data):
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', data)
     return cleantext
-

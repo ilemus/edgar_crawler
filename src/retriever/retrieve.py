@@ -2,23 +2,26 @@ import requests
 import os
 from tqdm import tqdm
 from src.utils import Utils
+from bs4 import BeautifulSoup as bs
 
 
+# bs4
 # tqdm==4.19.5
 def download_file(index, info):
     url = "https://www.sec.gov/Archives/edgar/data/1122304/000112230417000014/form10-k.htm"
-    req = requests.get(url, stream=True)
-    c_size = int(req.headers['content-length'])
+    req = requests.get(url)# , stream=True)
+    # c_size = int(req.headers['content-length'])
     print('Downloading ' + 'AET' + '...')
-    p_bar = tqdm(total=c_size)
+    # p_bar = tqdm(total=c_size)
 
-    with open("data.dat", 'wb') as f:
-        for chunk in req.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-                p_bar.update(1024)
+    # with open("data.dat", 'wb') as f:
+    #     for chunk in req.iter_content(chunk_size=1024):
+    #         if chunk:
+    #             f.write(chunk)
+    #             p_bar.update(1024)
 
-    p_bar.close()
+    # p_bar.close()
+    return req.content
 
 
 def read_data(path):
@@ -74,5 +77,35 @@ def read_data(path):
         print(row)
 
 
+def parse_html_data(data):
+    ret_data = []
+    soup = bs(data, "html.parser")
+    # Get all tables
+    tables = soup.findAll("table")
+    for table in tables:
+        rows = table.findAll("tr")
+        for row in rows:
+            row_data = []
+            cells = row.findAll("td")
+            for cell in cells:
+                div = cell.find("div")
+                if div is not None:
+                    font = div.find("font")
+                    if font is not None:
+                        dat = font.string
+                        if dat is not None and len(dat) > 0 and dat != '\xa0' and dat != '\xa0%':
+                            if dat == "&#8212;":
+                                dat = '-'
+                            row_data.append(dat)
+            # end for cell in cells:
+            if len(row_data) > 0:
+                ret_data.append(row_data)
+        # end for row in rows:
+
+    for row in ret_data:
+        print(row)
+
+
 # download_file(1, 2)
-read_data("data.dat")
+# read_data("data.dat")
+parse_html_data(download_file(1, 2))
