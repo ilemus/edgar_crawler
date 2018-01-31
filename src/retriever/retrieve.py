@@ -77,9 +77,9 @@ def read_data(path):
         print(row)
 
 
-def parse_html_data(data):
+def parse_html_data(html):
     ret_data = []
-    soup = bs(data, "html.parser")
+    soup = bs(html, "html.parser")
     # Get all tables
     tables = soup.findAll("table")
     for table in tables:
@@ -102,10 +102,48 @@ def parse_html_data(data):
                 ret_data.append(row_data)
         # end for row in rows:
 
-    for row in ret_data:
-        print(row)
+    return ret_data
+
+
+def html_to_json_10k(data):
+    html_list = parse_html_data(data)
+    # initialize the data
+    start, end = -1
+    for i in range(len(html_list)):
+        # There is Balance sheet, and then a second brief one at the end
+        if html_list[i] == "Assets:" and html_list[i + 1] == "Current assets:":
+            # Start scraping data from current assets
+            start = i + 1
+            for j in range(i + 1, len(html_list) - (i + 1)):
+                if html_list[j] == "Total equity":
+                    end = j
+
+                    # From start to end, end index + 1
+                    process_balance_sheet_10k(html_list[start:end + 1])
+
+
+def process_balance_sheet_10k(balance):
+    jdata = {}
+    for row in balance:
+        # If data exists, add it to formatted JSON, otherwise it is not included (no default value)
+        if row[0] == "Total current assets":
+            # 'Key', 'value'
+            jdata['total-current-assets'] = float(row[1])
+        elif row[0] == "Total assets":
+            # 'Key', '$', 'value'
+            jdata['total-assets'] = float(row[2])
+        elif row[0] == "Total current liabilities":
+            # 'Key', 'value'
+            jdata['total-current-liabilities'] = float(row[1])
+        elif row[0] == "Total liabilities":
+            # 'Key', 'value'
+            jdata['total-liabilities'] = float(row[1])
+        elif row[0] == "Total equity":
+            # 'Key', 'value'
+            jdata['total-equity'] = float(row[1])
+    return jdata
 
 
 # download_file(1, 2)
 # read_data("data.dat")
-parse_html_data(download_file(1, 2))
+# parse_html_data(download_file(1, 2))
