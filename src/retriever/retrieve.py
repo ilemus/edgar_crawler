@@ -126,19 +126,19 @@ def process_balance_sheet_10k(balance):
     jdata = {}
     for row in balance:
         # If data exists, add it to formatted JSON, otherwise it is not included (no default value)
-        if row[0] == "Total current assets":
+        if row[0] == "Total current assets" and len(row) > 1:
             # 'Key', 'value'
             jdata['total-current-assets'] = float(row[1])
-        elif row[0] == "Total assets":
+        elif row[0] == "Total assets" and len(row) > 2:
             # 'Key', '$', 'value'
             jdata['total-assets'] = float(row[2])
-        elif row[0] == "Total current liabilities":
+        elif row[0] == "Total current liabilities" and len(row) > 1:
             # 'Key', 'value'
             jdata['total-current-liabilities'] = float(row[1])
-        elif row[0] == "Total liabilities":
+        elif row[0] == "Total liabilities" and len(row) > 1:
             # 'Key', 'value'
             jdata['total-liabilities'] = float(row[1])
-        elif row[0] == "Total equity":
+        elif row[0] == "Total equity" and len(row) > 1:
             # 'Key', 'value'
             jdata['total-equity'] = float(row[1])
     return jdata
